@@ -52,8 +52,9 @@ const DB = [
     let info = {};
     info.students = [];
     info.admins = {};
-
-
+    info.admins.list = [];
+    let code;
+    
 
     baza.forEach((item,i) => {
         if(i === 0){ 
@@ -68,7 +69,7 @@ const DB = [
                           info.uniUrl = value.urlPrefix;
                           info.students.studentUrl = value.studentUrl;
                           info.students.uni = value.uni;
-                          info.admins.adminLink = value.adminLink;
+                          info.admins.list.link = value.adminLink;
                         }
                     })
                   })
@@ -76,16 +77,22 @@ const DB = [
             })
         } 
 
-      if(item.p_key == 'OI#CONFIG'){
+      if(item.s_key == 'USER#ADMIN'){
+        if(item.p_key == 'ADM#OI#6000'){
+         code = item.p_key;
+        }
+      }
+
+      if(item.p_key == `${uni}#CONFIG`){
         info.uni = item.university_name;
       }
-      if(item.p_key == 'OI#MANAGER'){
+      if(item.p_key == `${uni}#MANAGER`){
         let a = item.hasAccess
         a.forEach(item =>{
-          info.students.studenNumber = item;
+          info.students.studentNumber = item;
         })   
       }
-      if(item.p_key == 'OI#2000'){
+      if(item.p_key == `${uni}#2000`){
 
         if(item.s_key == 'STUDENT_DETAILS'){
           let b = Object.values(item);
@@ -108,7 +115,47 @@ const DB = [
         }
       }
     });
-   
+
+    let numb = info.students.studentNumber; 
+    info.students.studentUrl = `https://${numb}.oi.com`;   
+    
+
+    let hash = code; 
+    let adm = /ADM/;
+    let find = hash.match(adm);
+
+    let num = /6000/;
+    let find2 = hash.match(num);
+
+    find.forEach((item,i) => {
+      if(i == 0){
+        info.admins.shortCode = item;
+      }
+    })
+
+    find2.forEach((item,i) => {
+      if(i == 0){
+        let id = {id:item};
+        info.admins.list = id;
+      }
+    })
+
+    let numb2 = info.admins.list.id;
+    info.admins.list.link = `https://admin-${numb2}.oi.com`;
+
+
+    info.admins.list.students = {};
+  
+    let arr = [info.students.studentUrl, info.students.studentNumber];
+    arr.forEach((item,i) => {
+        if(i == 0){
+          info.admins.list.students.studentUrl = item;      
+        }
+        if(i == 1){
+          info.admins.list.students.studentsNumber = item;       
+        }
+    })
+
 return info;
 }  
 
