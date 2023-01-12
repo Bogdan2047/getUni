@@ -103,7 +103,12 @@ const getAllUsersByUni = (uni) => {
 
   students.name = names.data.name;
   students.deposit = depos.data.deposit;
-  students.studentsUrl = `https://${num}.oi.com`;
+  
+  let w = uni;
+
+  let a = w.toLowerCase()
+
+  students.studentsUrl = `https://${num}.${a}.com`;
 
   let admins = {};
 
@@ -139,7 +144,9 @@ const getAllUsersByUni = (uni) => {
   admins.list = [];
   admins.list.id = num;
  
-  data.adminLink = `https://admin-${num}.stg.com`;
+  data.adminLink = `https://admin-${num}.${a}.com`;
+  
+ 
   admins.list.link = data.adminLink;
 
   admins.list.students = [];
@@ -159,5 +166,5 @@ const getAllUsersByUni = (uni) => {
 }
 
 
-const stgUsers = getAllUsersByUni('OI');
+const stgUsers = getAllUsersByUni('STG');
 console.log(stgUsers);
