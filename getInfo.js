@@ -1,3 +1,5 @@
+const { json } = require("express");
+
 const DB = [
   {
     p_key: 'CONFIG',
@@ -49,7 +51,7 @@ const DB = [
 const getAllUsersByUni = (uni) => {
 
   let baza = DB;
-  let students = {};
+  let students = [];
 
   let info = baza.find((item) => {
       if(item.p_key == 'CONFIG' && item.s_key == 'main'){
@@ -82,82 +84,101 @@ const getAllUsersByUni = (uni) => {
      }
  })
 
- students.studentsNumber = stud.hasAccess;
- students.uni = data.shortCode;
- students.studentsUrl = data.studentUrl;
+ let ff = {};
 
- let num = students.studentsNumber;
- 
+ let studentsNumber = stud.hasAccess[0];
+ let unik = data.shortCode;
 
-  let names = baza.find((item) => {
-      if(item.p_key == `${uni}#${num}` && item.s_key == 'STUDENT_DETAILS'){
-          return true
-      }
-  })
+ let num = studentsNumber;
 
-  let depos = baza.find((item) => {
-      if(item.p_key == `${uni}#${num}` && item.s_key == 'FINANCE'){
-          return true
-      }
-  })
 
-  students.name = names.data.name;
-  students.deposit = depos.data.deposit;
+
+let finance = baza.filter((item) => {
+    if(item.p_key.startsWith(`${uni}#`) && item.s_key == 'FINANCE'){
+     return true
+    }
+})
+
+
+let ii = []
+for (let x = 0; x < finance.length; x++) {
+    let element = finance[x];
+    let j = element.data.deposit;
+    ii.push(j)
+}
+
+
+let details = baza.filter((item) => {
+    if(item.p_key.startsWith(`${uni}#`) && item.s_key == 'STUDENT_DETAILS'){
+     return true
+    }
+})
+
+let aa = [];
+for (let i = 0; i < details.length; i++) {
+    let element = details[i];
+    let d = element.data.name;
+    aa.push(d)
+}
+
+    ff.studentNumber = studentsNumber;
+    ff.uni = unik;
+    ff.name = aa;
+    ff.deposit = ii;
   
-  let w = uni;
+  let url2 = data.studentUrl;
+  
+  let rep2 = url2.replace(/{STUDENT_NUMBER}/,num);
 
-  let a = w.toLowerCase()
+ff.studentUrl = rep2;
 
-  students.studentsUrl = `https://${num}.${a}.com`;
+students.push(ff)
+
 
   let admins = {};
 
 
-  let datas;
-
-  baza.forEach((item) => {
-      if(item.p_key == `${uni}#${num}` && item.s_key == 'USER#STUDENT'){
-          if(item.p_key == `${uni}#4000` ){
-              num = '3000';
-              item.p_key = `${uni}#${num}`;               
-              datas = item.p_key;
-          }
-          if(item.p_key == `${uni}#2000`){
-              num = '6000';
-              item.p_key = `${uni}#${num}`;
-              datas = item.p_key;
-          }         
-      }
+  let filterAdmin = baza.find((item) => {
+    if(item.p_key.startsWith(`ADM#${uni}`)){
+        return true
+    }
   })
 
-  let user = baza.find((item) => {
-      if(item.p_key == `ADM#${datas}` && item.s_key == 'USER#ADMIN'){
-          return true
-      }
-  })
+  let hash = filterAdmin.p_key; 
+  hash.split('#');
+  let find = hash.split('#');
 
 
-  let hash = user.p_key; 
-  let find = hash.slice(0,3);
+ num = find[2];
 
-  admins.shortCode = find;
-  admins.list = [];
-  admins.list.id = num;
- 
-  data.adminLink = `https://admin-${num}.${a}.com`;
-  
- 
-  admins.list.link = data.adminLink;
+  admins.shortCode = find[0];
+  let list = [];
 
-  admins.list.students = [];
-  admins.list.students.studentNumber = students.studentsNumber;
-  admins.list.students.studentUrl = students.studentsUrl;
+  let gg = {};
+  gg.id = find[2]; 
+
+
+let url = data.adminLink;
+
+ let rep = url.replace(/{ADMIN_NUMBER}/, num)
+
+ gg.link = rep;
+ list.push(gg)
+
+let tw = {}
+
+tw.studentNumber = studentsNumber;
+tw.studentUrl = rep2;
+list.students = [];
+list.students.push(tw)
+
+admins.list = list;
 
   let inform = {};
 
   inform.uni = data.unis;
   inform.shortCode = data.shortCode;
-  inform.uniUrl = data.urlPrefix;
+  inform.uniUrl = data.urlPrefix;;
   inform.students = students;
   inform.admins = admins;
   
